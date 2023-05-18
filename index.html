@@ -11,6 +11,20 @@
             h1 {font-size: 1.5em}
             img {width:400px;}
             div.leaflet-popup-content {width: 400px !important;}
+            .lake-label {
+                text-align:center;
+                color:rgb(0, 124, 196);   
+                font-size: 1em;
+                font-weight: bold;
+                cursor: grab;
+            }
+            .small-lake-label {
+                text-align:center;
+                color:rgb(0, 124, 196);   
+                font-size: 0.8em;
+                font-weight: bold;
+                cursor: grab;
+            }
         </style>
     </head>
 
@@ -257,6 +271,26 @@
                 }
             }).addTo(map);
             L.geoJson(ulkoilureitti, {style: ulkoilureittiStyle, onEachFeature: onEachFeature}).addTo(map);
+
+            //järvien nimet
+            var lakes = [
+                {'name':'Suujärvi', latlng:[60.7747, 23.849], 'className':'lake-label'},
+                {'name':'Määrlammi', latlng:[60.77, 23.855], 'className':'lake-label'},
+                {'name':'Kuivajärvi', latlng:[60.785, 23.86], 'className':'lake-label'},
+                {'name':'Iso Räkkälammi', latlng:[60.7735, 23.842], 'className':'small-lake-label'},
+                {'name':'Vähä Räkkälammi', latlng:[60.7718, 23.8417], 'className':'small-lake-label'},
+                {'name':'Tanilanlammi', latlng:[60.7675, 23.876], 'className':'small-lake-label'}
+            ]
+            function addLabelIconMarker(value, index, array) {
+                L.marker(value.latlng, {icon: L.divIcon({
+                        className: value.className,
+                        iconSize: [20, 20],
+                        iconAnchor: [20, 15],
+                        html: value.name
+                    })
+                }).addTo(map);
+            }
+            lakes.forEach(addLabelIconMarker);
         </script>
     </body>
 </html>
