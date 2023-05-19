@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
         <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script> 
+        <script src="./js/Leaflet.ContinuousZoom.js"></script> 
         <style >
             h1 {font-size: 1.5em}
             img {width:400px;}
@@ -41,14 +42,10 @@
                 iconSize: [12, 12],
                 iconAnchor: [6, 6]
             });
-
             // vektoritiilien tyylittely
             var vectorTileOptions = {
                 attribution: 'Maanmittauslaitos',
                 vectorTileLayerStyles: { 
-                    nimisto: {
-                        opacity: 0
-                    },
                     hallintoalue: {
                         opacity: 0
                     },
@@ -85,6 +82,9 @@
                     },
                     selite: {
                         opacity:0
+                    },
+                    nimisto: {
+                        opacity: 0
                     },
                     alueraja: function(p) {
                         var kohdeluokka = p.kohdeluokka;
@@ -191,6 +191,7 @@
             var nlsVectorMap = L.vectorGrid.protobuf(vectorMapUrl, vectorTileOptions);
             var esriSatellite = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri, Maxar, Earthstar Geographics, and the GIS User Community'})
             bounds = new L.LatLngBounds(new L.LatLng(60.73, 23.75), new L.LatLng(60.81, 23.95));
+            var hillshade = L.tileLayer('./img/maptiles/hillshade/{z}/{x}/{y}.png', {tms: 1, opacity: 0.6, nativeZooms: [15], bounds:bounds, attribution: "Maanmittauslaitos"});
 
             // url-parametrien lukutoiminnallisuus
             var params = {};
@@ -209,11 +210,10 @@
                 maxBounds: bounds,
                 maxBoundsViscosity: 0.2
             });
-            var baseMaps = {
-                "Maastokartta": nlsVectorMap,
-                "Satelliitti": esriSatellite
-            };
-            L.control.layers(baseMaps,null,{collapsed:false}).addTo(map);
+            var baseMaps = {"Maastokartta": nlsVectorMap, "Satelliitti": esriSatellite};
+            var overlayMaps = {"Vinovalovarjoste": hillshade};
+
+            L.control.layers(baseMaps,overlayMaps,{collapsed:false}).addTo(map);
             nlsVectorMap.addTo(map);
 
             var opasteet = {
@@ -262,6 +262,7 @@
                     popupAnchor:[0,-14]
                 }
             })
+
             // opasteiden ja ulkoilureitin lisääminen kartalle
             L.geoJson(opasteet, {
                 onEachFeature: onEachFeature, 
@@ -272,7 +273,7 @@
             }).addTo(map);
             L.geoJson(ulkoilureitti, {style: ulkoilureittiStyle, onEachFeature: onEachFeature}).addTo(map);
 
-            //järvien nimet
+            // järvien tekstit
             var lakes = [
                 {'name':'Suujärvi', latlng:[60.7747, 23.849], 'className':'lake-label'},
                 {'name':'Määrlammi', latlng:[60.77, 23.855], 'className':'lake-label'},
@@ -281,7 +282,7 @@
                 {'name':'Vähä Räkkälammi', latlng:[60.7718, 23.8417], 'className':'small-lake-label'},
                 {'name':'Tanilanlammi', latlng:[60.7675, 23.876], 'className':'small-lake-label'}
             ]
-            function addLabelIconMarker(value, index, array) {
+            function addMapLabel(value, index, array) {
                 L.marker(value.latlng, {icon: L.divIcon({
                         className: value.className,
                         iconSize: [20, 20],
@@ -290,7 +291,7 @@
                     })
                 }).addTo(map);
             }
-            lakes.forEach(addLabelIconMarker);
+            lakes.forEach(addMapLabel);
         </script>
     </body>
 </html>
